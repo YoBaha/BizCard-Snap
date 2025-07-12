@@ -7,9 +7,11 @@ class ApiService {
   factory ApiService() => _instance;
   ApiService._internal();
 
-  final String _baseUrl = 'http://10.0.2.2:5000'; 
+  static const String _baseUrl = 'http://10.0.2.2:5000'; // Changed to static
   String? _token;
 
+  // Static getter for baseUrl
+  static String get baseUrl => _baseUrl;
 
   String? get token => _token;
 

@@ -185,7 +185,7 @@ class _HomePageState extends State<HomePage> {
                             strokeWidth: 2.5,
                           )
                         : const Text(
-                            'Scan Card',
+                            'Scan Card Info',
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.w600,
