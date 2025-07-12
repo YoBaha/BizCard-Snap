@@ -1,0 +1,363 @@
+import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_contacts/flutter_contacts.dart';
+import 'package:permission_handler/permission_handler.dart';
+import '../services/api_service.dart';
+
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
+
+  @override
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  final ApiService _apiService = ApiService();
+  Map<String, String> extractedData = {};
+  bool isLoading = false;
+
+  Future<String> _saveImageTemporarily(XFile image) async {
+    final directory = await getTemporaryDirectory();
+    final path = '${directory.path}/temp_image.png';
+    await image.saveTo(path);
+    return path;
+  }
+
+  Future<void> _uploadImage() async {
+    if (_apiService.token == null) {
+      setState(() {
+        extractedData = {"error": "Please log in again"};
+      });
+      print('No token available');
+      return;
+    }
+    final ImagePicker _picker = ImagePicker();
+    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+    if (image == null) return;
+
+    setState(() => isLoading = true);
+
+    try {
+      final imagePath = await _saveImageTemporarily(image);
+      final result = await _apiService.uploadImage(imagePath);
+      if (result != null) {
+        setState(() {
+          extractedData = result;
+          isLoading = false;
+        });
+      } else {
+        setState(() {
+          extractedData = {"error": "Failed to process image"};
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        extractedData = {"error": "Error: $e"};
+        isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _searchCompany(String? companyName) async {
+    if (companyName == null || companyName.isEmpty) return;
+    final url = Uri.parse('https://www.google.com/search?q=${Uri.encodeComponent(companyName)}');
+    try {
+      await launchUrl(url, mode: LaunchMode.externalApplication);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error launching search: $e')),
+      );
+    }
+  }
+
+  Future<void> _sendEmail(String? email) async {
+    if (email == null || email.isEmpty) return;
+    final url = Uri.parse('mailto:$email?subject=Contact from BizCard Snap');
+    try {
+      if (await canLaunchUrl(url)) {
+        await launchUrl(url, mode: LaunchMode.externalApplication);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not launch email app')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error launching email app: $e')),
+      );
+    }
+  }
+
+  Future<void> _saveToContacts(String? phone, String? personName) async {
+    if (phone == null || phone.isEmpty) return;
+
+    if (await FlutterContacts.requestPermission()) {
+      try {
+        final firstPhone = phone.split(';')[0].trim();
+        final contact = Contact()
+          ..name.first = (personName ?? '').split(' ').first
+          ..name.last = (personName ?? '').split(' ').length > 1 ? (personName ?? '').split(' ').last : ''
+          ..phones = [Phone(firstPhone.replaceAll(RegExp(r'[\s-]'), ''))];
+
+        await contact.insert();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Contact saved successfully')),
+        );
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to save contact: $e')),
+        );
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Contacts permission denied')),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0xFF6441A5), Color(0xFF2a0845)],
+          ),
+        ),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // App Title
+                const Text(
+                  'BizCard Snap',
+                  style: TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    letterSpacing: 1.2,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                const Text(
+                  'Scan and save business cards effortlessly',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.white70,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+                const SizedBox(height: 30),
+                // Scan Button
+                Center(
+                  child: GestureDetector(
+                    onTap: isLoading ? null : _uploadImage,
+                    child: Container(
+                      width: 200,
+                      height: 60,
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF11998e), Color(0xFF38ef7d)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(30),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.2),
+                            blurRadius: 8,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Center(
+                        child: isLoading
+                            ? const CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2.5,
+                              )
+                            : const Text(
+                                'Scan Card',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white,
+                                ),
+                              ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 30),
+                // Extracted Data Card
+                if (extractedData.isNotEmpty)
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: Container(
+                        padding: const EdgeInsets.all(24.0), // Increased padding
+                        margin: const EdgeInsets.symmetric(horizontal: 8.0), // Added margin for larger appearance
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFFFF8008), Color(0xFFFFC837)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(20), // Slightly larger radius
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.15),
+                              blurRadius: 12,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: extractedData.entries.map((entry) {
+                            if (entry.key != "error") {
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 12.0), // More vertical spacing
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Expanded(
+                                      flex: 2,
+                                      child: Text(
+                                        entry.key,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16,
+                                          color: Color(0xFF18181B),
+                                        ),
+                                      ),
+                                    ),
+                                    Expanded(
+                                      flex: 3,
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.end,
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Expanded(
+                                            child: Text(
+                                              entry.value,
+                                              style: const TextStyle(
+                                                fontSize: 16,
+                                                color: Colors.white,
+                                              ),
+                                              textAlign: TextAlign.right,
+                                              softWrap: true, // Allow text to wrap
+                                            ),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          if (entry.key == "Company Name" && entry.value.isNotEmpty)
+                                            Container(
+                                              width: 40,
+                                              height: 40,
+                                              decoration: BoxDecoration(
+                                                gradient: const LinearGradient(
+                                                  colors: [Color(0xFF2B32B2), Color(0xFF1488CC)],
+                                                  begin: Alignment.topLeft,
+                                                  end: Alignment.bottomRight,
+                                                ),
+                                                borderRadius: BorderRadius.circular(12),
+                                                boxShadow: [
+                                                  BoxShadow(
+                                                    color: Colors.black.withOpacity(0.1),
+                                                    blurRadius: 6,
+                                                    offset: const Offset(0, 2),
+                                                  ),
+                                                ],
+                                              ),
+                                              child: IconButton(
+                                                icon: const Icon(Icons.search, color: Colors.white, size: 20),
+                                                onPressed: () => _searchCompany(entry.value),
+                                              ),
+                                            ),
+                                          if (entry.key == "Email" && entry.value.isNotEmpty)
+                                            Container(
+                                              width: 40,
+                                              height: 40,
+                                              decoration: BoxDecoration(
+                                                gradient: const LinearGradient(
+                                                  colors: [Color(0xFFef473a), Color(0xFFcb2d3e)],
+                                                  begin: Alignment.topLeft,
+                                                  end: Alignment.bottomRight,
+                                                ),
+                                                borderRadius: BorderRadius.circular(12),
+                                                boxShadow: [
+                                                  BoxShadow(
+                                                    color: Colors.black.withOpacity(0.1),
+                                                    blurRadius: 6,
+                                                    offset: const Offset(0, 2),
+                                                  ),
+                                                ],
+                                              ),
+                                              child: IconButton(
+                                                icon: const Icon(Icons.email, color: Colors.white, size: 20),
+                                                onPressed: () => _sendEmail(entry.value),
+                                              ),
+                                            ),
+                                          if (entry.key == "Phone" && entry.value.isNotEmpty)
+                                            Container(
+                                              width: 40,
+                                              height: 40,
+                                              decoration: BoxDecoration(
+                                                gradient: const LinearGradient(
+                                                  colors: [Color(0xFF2B32B2), Color(0xFF1488CC)],
+                                                  begin: Alignment.topLeft,
+                                                  end: Alignment.bottomRight,
+                                                ),
+                                                borderRadius: BorderRadius.circular(12),
+                                                boxShadow: [
+                                                  BoxShadow(
+                                                    color: Colors.black.withOpacity(0.1),
+                                                    blurRadius: 6,
+                                                    offset: const Offset(0, 2),
+                                                  ),
+                                                ],
+                                              ),
+                                              child: IconButton(
+                                                icon: const Icon(Icons.person_add, color: Colors.white, size: 20),
+                                                onPressed: () => _saveToContacts(entry.value, extractedData["Person Name"]),
+                                              ),
+                                            ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }
+                            return const SizedBox.shrink();
+                          }).toList(),
+                        ),
+                      ),
+                    ),
+                  ),
+                if (extractedData.containsKey("error"))
+                  Center(
+                    child: Text(
+                      extractedData["error"]!,
+                      style: const TextStyle(
+                        color: Colors.redAccent,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

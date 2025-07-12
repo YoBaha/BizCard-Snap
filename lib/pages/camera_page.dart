@@ -1,0 +1,15 @@
+import 'package:flutter/material.dart';
+
+class CameraPage extends StatelessWidget {
+  const CameraPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Center(
+      child: Text(
+        'Camera Page (Implement camera functionality here later)',
+        style: TextStyle(fontSize: 18),
+      ),
+    );
+  }
+}
