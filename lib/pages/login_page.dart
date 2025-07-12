@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:bizcard_snap/services/api_service.dart';
-import 'home_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -21,11 +20,10 @@ class _LoginPageState extends State<LoginPage> {
       _usernameController.text,
       _passwordController.text,
     );
+    print('Login response: $response');
     if (response != null) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const HomePage()),
-      );
+      print('Navigating to /home');
+      Navigator.pushReplacementNamed(context, '/home');
     } else {
       setState(() => _errorMessage = 'Login failed. Check credentials.');
     }
@@ -33,6 +31,7 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    print('Building LoginPage');
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
@@ -49,7 +48,6 @@ class _LoginPageState extends State<LoginPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // App Title
                   const Text(
                     'BizCard Snap',
                     style: TextStyle(
@@ -57,6 +55,7 @@ class _LoginPageState extends State<LoginPage> {
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
                       letterSpacing: 1.2,
+                      decoration: TextDecoration.none,
                     ),
                   ),
                   const SizedBox(height: 10),
@@ -66,10 +65,10 @@ class _LoginPageState extends State<LoginPage> {
                       fontSize: 16,
                       color: Colors.white70,
                       fontWeight: FontWeight.w400,
+                      decoration: TextDecoration.none,
                     ),
                   ),
                   const SizedBox(height: 30),
-                  // Form Card
                   Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
@@ -92,10 +91,10 @@ class _LoginPageState extends State<LoginPage> {
                       children: [
                         TextField(
                           controller: _usernameController,
-                          style: const TextStyle(color: Colors.white),
+                          style: const TextStyle(color: Colors.white, decoration: TextDecoration.none),
                           decoration: InputDecoration(
                             labelText: 'Username',
-                            labelStyle: TextStyle(color: Colors.white70),
+                            labelStyle: const TextStyle(color: Colors.white70, decoration: TextDecoration.none),
                             filled: true,
                             fillColor: Colors.white.withOpacity(0.1),
                             border: OutlineInputBorder(
@@ -107,10 +106,10 @@ class _LoginPageState extends State<LoginPage> {
                         const SizedBox(height: 16),
                         TextField(
                           controller: _passwordController,
-                          style: const TextStyle(color: Colors.white),
+                          style: const TextStyle(color: Colors.white, decoration: TextDecoration.none),
                           decoration: InputDecoration(
                             labelText: 'Password',
-                            labelStyle: TextStyle(color: Colors.white70),
+                            labelStyle: const TextStyle(color: Colors.white70, decoration: TextDecoration.none),
                             filled: true,
                             fillColor: Colors.white.withOpacity(0.1),
                             border: OutlineInputBorder(
@@ -148,6 +147,7 @@ class _LoginPageState extends State<LoginPage> {
                                   fontSize: 18,
                                   fontWeight: FontWeight.w600,
                                   color: Colors.white,
+                                  decoration: TextDecoration.none,
                                 ),
                               ),
                             ),
@@ -162,6 +162,7 @@ class _LoginPageState extends State<LoginPage> {
                                 color: Colors.redAccent,
                                 fontSize: 14,
                                 fontWeight: FontWeight.w500,
+                                decoration: TextDecoration.none,
                               ),
                             ),
                           ),
@@ -179,6 +180,7 @@ class _LoginPageState extends State<LoginPage> {
                         color: Colors.white,
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
+                        decoration: TextDecoration.none,
                       ),
                     ),
                   ),

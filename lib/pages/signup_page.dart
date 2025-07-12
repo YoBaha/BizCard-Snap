@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:bizcard_snap/services/api_service.dart';
-import 'login_page.dart';
 
 class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
@@ -23,11 +22,10 @@ class _SignupPageState extends State<SignupPage> {
       _emailController.text,
       _passwordController.text,
     );
+    print('Signup response: $response');
     if (response != null) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const LoginPage()),
-      );
+      print('Navigating to /login');
+      Navigator.pushReplacementNamed(context, '/login');
     } else {
       setState(() => _errorMessage = 'Signup failed. Username may exist.');
     }
@@ -35,6 +33,7 @@ class _SignupPageState extends State<SignupPage> {
 
   @override
   Widget build(BuildContext context) {
+    print('Building SignupPage');
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
@@ -51,7 +50,6 @@ class _SignupPageState extends State<SignupPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // App Title
                   const Text(
                     'BizCard Snap',
                     style: TextStyle(
@@ -59,6 +57,7 @@ class _SignupPageState extends State<SignupPage> {
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
                       letterSpacing: 1.2,
+                      decoration: TextDecoration.none,
                     ),
                   ),
                   const SizedBox(height: 10),
@@ -68,10 +67,10 @@ class _SignupPageState extends State<SignupPage> {
                       fontSize: 16,
                       color: Colors.white70,
                       fontWeight: FontWeight.w400,
+                      decoration: TextDecoration.none,
                     ),
                   ),
                   const SizedBox(height: 30),
-                  // Form Card
                   Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
@@ -94,10 +93,10 @@ class _SignupPageState extends State<SignupPage> {
                       children: [
                         TextField(
                           controller: _usernameController,
-                          style: const TextStyle(color: Colors.white),
+                          style: const TextStyle(color: Colors.white, decoration: TextDecoration.none),
                           decoration: InputDecoration(
                             labelText: 'Username',
-                            labelStyle: TextStyle(color: Colors.white70),
+                            labelStyle: const TextStyle(color: Colors.white70, decoration: TextDecoration.none),
                             filled: true,
                             fillColor: Colors.white.withOpacity(0.1),
                             border: OutlineInputBorder(
@@ -109,10 +108,10 @@ class _SignupPageState extends State<SignupPage> {
                         const SizedBox(height: 16),
                         TextField(
                           controller: _emailController,
-                          style: const TextStyle(color: Colors.white),
+                          style: const TextStyle(color: Colors.white, decoration: TextDecoration.none),
                           decoration: InputDecoration(
                             labelText: 'Email',
-                            labelStyle: TextStyle(color: Colors.white70),
+                            labelStyle: const TextStyle(color: Colors.white70, decoration: TextDecoration.none),
                             filled: true,
                             fillColor: Colors.white.withOpacity(0.1),
                             border: OutlineInputBorder(
@@ -124,10 +123,10 @@ class _SignupPageState extends State<SignupPage> {
                         const SizedBox(height: 16),
                         TextField(
                           controller: _passwordController,
-                          style: const TextStyle(color: Colors.white),
+                          style: const TextStyle(color: Colors.white, decoration: TextDecoration.none),
                           decoration: InputDecoration(
                             labelText: 'Password',
-                            labelStyle: TextStyle(color: Colors.white70),
+                            labelStyle: const TextStyle(color: Colors.white70, decoration: TextDecoration.none),
                             filled: true,
                             fillColor: Colors.white.withOpacity(0.1),
                             border: OutlineInputBorder(
@@ -165,6 +164,7 @@ class _SignupPageState extends State<SignupPage> {
                                   fontSize: 18,
                                   fontWeight: FontWeight.w600,
                                   color: Colors.white,
+                                  decoration: TextDecoration.none,
                                 ),
                               ),
                             ),
@@ -179,6 +179,7 @@ class _SignupPageState extends State<SignupPage> {
                                 color: Colors.redAccent,
                                 fontSize: 14,
                                 fontWeight: FontWeight.w500,
+                                decoration: TextDecoration.none,
                               ),
                             ),
                           ),
@@ -196,6 +197,7 @@ class _SignupPageState extends State<SignupPage> {
                         color: Colors.white,
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
+                        decoration: TextDecoration.none,
                       ),
                     ),
                   ),

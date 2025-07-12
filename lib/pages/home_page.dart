@@ -32,6 +32,7 @@ class _HomePageState extends State<HomePage> {
         extractedData = {"error": "Please log in again"};
       });
       print('No token available');
+      Navigator.pushReplacementNamed(context, '/login');
       return;
     }
     final ImagePicker _picker = ImagePicker();
@@ -69,7 +70,7 @@ class _HomePageState extends State<HomePage> {
       await launchUrl(url, mode: LaunchMode.externalApplication);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error launching search: $e')),
+        SnackBar(content: Text('Error launching search: $e', style: const TextStyle(decoration: TextDecoration.none))),
       );
     }
   }
@@ -82,12 +83,12 @@ class _HomePageState extends State<HomePage> {
         await launchUrl(url, mode: LaunchMode.externalApplication);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Could not launch email app')),
+          const SnackBar(content: Text('Could not launch email app', style: TextStyle(decoration: TextDecoration.none))),
         );
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error launching email app: $e')),
+        SnackBar(content: Text('Error launching email app: $e', style: const TextStyle(decoration: TextDecoration.none))),
       );
     }
   }
@@ -105,257 +106,284 @@ class _HomePageState extends State<HomePage> {
 
         await contact.insert();
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Contact saved successfully')),
+          const SnackBar(content: Text('Contact saved successfully', style: TextStyle(decoration: TextDecoration.none))),
         );
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to save contact: $e')),
+          SnackBar(content: Text('Failed to save contact: $e', style: const TextStyle(decoration: TextDecoration.none))),
         );
       }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Contacts permission denied')),
+        const SnackBar(content: Text('Contacts permission denied', style: TextStyle(decoration: TextDecoration.none))),
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFF6441A5), Color(0xFF2a0845)],
-          ),
+    print('Building HomePage');
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF6441A5), Color(0xFF2a0845)],
         ),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // App Title
-                const Text(
-                  'BizCard Snap',
-                  style: TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                    letterSpacing: 1.2,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                const Text(
-                  'Scan and save business cards effortlessly',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.white70,
-                    fontWeight: FontWeight.w400,
-                  ),
-                ),
-                const SizedBox(height: 30),
-                // Scan Button
-                Center(
-                  child: GestureDetector(
-                    onTap: isLoading ? null : _uploadImage,
-                    child: Container(
-                      width: 200,
-                      height: 60,
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFF11998e), Color(0xFF38ef7d)],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        borderRadius: BorderRadius.circular(30),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.2),
-                            blurRadius: 8,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'BizCard Snap',
+              style: TextStyle(
+                fontSize: 32,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+                letterSpacing: 1.2,
+                decoration: TextDecoration.none,
+              ),
+            ),
+            const SizedBox(height: 10),
+            const Text(
+              'Scan and save business cards effortlessly',
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.white70,
+                fontWeight: FontWeight.w400,
+                decoration: TextDecoration.none,
+              ),
+            ),
+            const SizedBox(height: 30),
+            Center(
+              child: GestureDetector(
+                onTap: isLoading ? null : _uploadImage,
+                child: Container(
+                  width: 200,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF11998e), Color(0xFF38ef7d)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(30),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.2),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
                       ),
-                      child: Center(
-                        child: isLoading
-                            ? const CircularProgressIndicator(
-                                color: Colors.white,
-                                strokeWidth: 2.5,
-                              )
-                            : const Text(
-                                'Scan Card',
+                    ],
+                  ),
+                  child: Center(
+                    child: isLoading
+                        ? const CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2.5,
+                          )
+                        : const Text(
+                            'Scan Card',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                              decoration: TextDecoration.none,
+                            ),
+                          ),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 30),
+            Expanded(
+              child: SingleChildScrollView(
+                child: Container(
+                  padding: const EdgeInsets.all(24.0),
+                  margin: const EdgeInsets.symmetric(horizontal: 8.0),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFFFF8008), Color(0xFFFFC837)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.15),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (extractedData.isEmpty || extractedData.containsKey("error")) ...[
+                        Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(
+                                Icons.image,
+                                size: 100,
+                                color: Colors.white70,
+                              ),
+                              const SizedBox(height: 20),
+                              const Text(
+                                'No card scanned yet',
                                 style: TextStyle(
                                   fontSize: 18,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.white,
+                                  color: Colors.white70,
+                                  fontWeight: FontWeight.w500,
+                                  decoration: TextDecoration.none,
                                 ),
                               ),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 30),
-                // Extracted Data Card
-                if (extractedData.isNotEmpty)
-                  Expanded(
-                    child: SingleChildScrollView(
-                      child: Container(
-                        padding: const EdgeInsets.all(24.0), // Increased padding
-                        margin: const EdgeInsets.symmetric(horizontal: 8.0), // Added margin for larger appearance
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFFFF8008), Color(0xFFFFC837)],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
+                              if (extractedData.containsKey("error"))
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 16),
+                                  child: Text(
+                                    extractedData["error"]!,
+                                    style: const TextStyle(
+                                      color: Colors.redAccent,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w500,
+                                      decoration: TextDecoration.none,
+                                    ),
+                                  ),
+                                ),
+                            ],
                           ),
-                          borderRadius: BorderRadius.circular(20), // Slightly larger radius
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.15),
-                              blurRadius: 12,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
                         ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: extractedData.entries.map((entry) {
-                            if (entry.key != "error") {
-                              return Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 12.0), // More vertical spacing
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Expanded(
-                                      flex: 2,
-                                      child: Text(
-                                        entry.key,
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 16,
-                                          color: Color(0xFF18181B),
-                                        ),
+                      ] else ...[
+                        ...extractedData.entries.map((entry) {
+                          if (entry.key != "error") {
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 12.0),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Expanded(
+                                    flex: 2,
+                                    child: Text(
+                                      entry.key,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                        color: Color(0xFF18181B),
+                                        decoration: TextDecoration.none,
                                       ),
                                     ),
-                                    Expanded(
-                                      flex: 3,
-                                      child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.end,
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Expanded(
-                                            child: Text(
-                                              entry.value,
-                                              style: const TextStyle(
-                                                fontSize: 16,
-                                                color: Colors.white,
+                                  ),
+                                  Expanded(
+                                    flex: 3,
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Expanded(
+                                          child: Text(
+                                            entry.value,
+                                            style: const TextStyle(
+                                              fontSize: 16,
+                                              color: Colors.white,
+                                              decoration: TextDecoration.none,
+                                            ),
+                                            textAlign: TextAlign.right,
+                                            softWrap: true,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        if (entry.key == "Company Name" && entry.value.isNotEmpty)
+                                          Container(
+                                            width: 40,
+                                            height: 40,
+                                            decoration: BoxDecoration(
+                                              gradient: const LinearGradient(
+                                                colors: [Color(0xFF2B32B2), Color(0xFF1488CC)],
+                                                begin: Alignment.topLeft,
+                                                end: Alignment.bottomRight,
                                               ),
-                                              textAlign: TextAlign.right,
-                                              softWrap: true, // Allow text to wrap
+                                              borderRadius: BorderRadius.circular(12),
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: Colors.black.withOpacity(0.1),
+                                                  blurRadius: 6,
+                                                  offset: const Offset(0, 2),
+                                                ),
+                                              ],
+                                            ),
+                                            child: IconButton(
+                                              icon: const Icon(Icons.search, color: Colors.white, size: 20),
+                                              onPressed: () => _searchCompany(entry.value),
                                             ),
                                           ),
-                                          const SizedBox(width: 8),
-                                          if (entry.key == "Company Name" && entry.value.isNotEmpty)
-                                            Container(
-                                              width: 40,
-                                              height: 40,
-                                              decoration: BoxDecoration(
-                                                gradient: const LinearGradient(
-                                                  colors: [Color(0xFF2B32B2), Color(0xFF1488CC)],
-                                                  begin: Alignment.topLeft,
-                                                  end: Alignment.bottomRight,
+                                        if (entry.key == "Email" && entry.value.isNotEmpty)
+                                          Container(
+                                            width: 40,
+                                            height: 40,
+                                            decoration: BoxDecoration(
+                                              gradient: const LinearGradient(
+                                                colors: [Color(0xFFef473a), Color(0xFFcb2d3e)],
+                                                begin: Alignment.topLeft,
+                                                end: Alignment.bottomRight,
+                                              ),
+                                              borderRadius: BorderRadius.circular(12),
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: Colors.black.withOpacity(0.1),
+                                                  blurRadius: 6,
+                                                  offset: const Offset(0, 2),
                                                 ),
-                                                borderRadius: BorderRadius.circular(12),
-                                                boxShadow: [
-                                                  BoxShadow(
-                                                    color: Colors.black.withOpacity(0.1),
-                                                    blurRadius: 6,
-                                                    offset: const Offset(0, 2),
-                                                  ),
-                                                ],
-                                              ),
-                                              child: IconButton(
-                                                icon: const Icon(Icons.search, color: Colors.white, size: 20),
-                                                onPressed: () => _searchCompany(entry.value),
-                                              ),
+                                              ],
                                             ),
-                                          if (entry.key == "Email" && entry.value.isNotEmpty)
-                                            Container(
-                                              width: 40,
-                                              height: 40,
-                                              decoration: BoxDecoration(
-                                                gradient: const LinearGradient(
-                                                  colors: [Color(0xFFef473a), Color(0xFFcb2d3e)],
-                                                  begin: Alignment.topLeft,
-                                                  end: Alignment.bottomRight,
+                                            child: IconButton(
+                                              icon: const Icon(Icons.email, color: Colors.white, size: 20),
+                                              onPressed: () => _sendEmail(entry.value),
+                                            ),
+                                          ),
+                                        if (entry.key == "Phone" && entry.value.isNotEmpty)
+                                          Container(
+                                            width: 40,
+                                            height: 40,
+                                            decoration: BoxDecoration(
+                                              gradient: const LinearGradient(
+                                                colors: [Color(0xFF2B32B2), Color(0xFF1488CC)],
+                                                begin: Alignment.topLeft,
+                                                end: Alignment.bottomRight,
+                                              ),
+                                              borderRadius: BorderRadius.circular(12),
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: Colors.black.withOpacity(0.1),
+                                                  blurRadius: 6,
+                                                  offset: const Offset(0, 2),
                                                 ),
-                                                borderRadius: BorderRadius.circular(12),
-                                                boxShadow: [
-                                                  BoxShadow(
-                                                    color: Colors.black.withOpacity(0.1),
-                                                    blurRadius: 6,
-                                                    offset: const Offset(0, 2),
-                                                  ),
-                                                ],
-                                              ),
-                                              child: IconButton(
-                                                icon: const Icon(Icons.email, color: Colors.white, size: 20),
-                                                onPressed: () => _sendEmail(entry.value),
-                                              ),
+                                              ],
                                             ),
-                                          if (entry.key == "Phone" && entry.value.isNotEmpty)
-                                            Container(
-                                              width: 40,
-                                              height: 40,
-                                              decoration: BoxDecoration(
-                                                gradient: const LinearGradient(
-                                                  colors: [Color(0xFF2B32B2), Color(0xFF1488CC)],
-                                                  begin: Alignment.topLeft,
-                                                  end: Alignment.bottomRight,
-                                                ),
-                                                borderRadius: BorderRadius.circular(12),
-                                                boxShadow: [
-                                                  BoxShadow(
-                                                    color: Colors.black.withOpacity(0.1),
-                                                    blurRadius: 6,
-                                                    offset: const Offset(0, 2),
-                                                  ),
-                                                ],
-                                              ),
-                                              child: IconButton(
-                                                icon: const Icon(Icons.person_add, color: Colors.white, size: 20),
-                                                onPressed: () => _saveToContacts(entry.value, extractedData["Person Name"]),
-                                              ),
+                                            child: IconButton(
+                                              icon: const Icon(Icons.person_add, color: Colors.white, size: 20),
+                                              onPressed: () => _saveToContacts(entry.value, extractedData["Person Name"]),
                                             ),
-                                        ],
-                                      ),
+                                          ),
+                                      ],
                                     ),
-                                  ],
-                                ),
-                              );
-                            }
-                            return const SizedBox.shrink();
-                          }).toList(),
-                        ),
-                      ),
-                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }
+                          return const SizedBox.shrink();
+                        }).toList(),
+                      ],
+                    ],
                   ),
-                if (extractedData.containsKey("error"))
-                  Center(
-                    child: Text(
-                      extractedData["error"]!,
-                      style: const TextStyle(
-                        color: Colors.redAccent,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-              ],
+                ),
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );
