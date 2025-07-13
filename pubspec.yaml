@@ -44,6 +44,7 @@ dependencies:
   jwt_decoder: ^2.0.1
   barcode_scan2: ^4.5.1
   shared_preferences: ^2.5.3
+  flutter_launcher_icons: ^0.14.4
 
 dev_dependencies:
   flutter_test:
@@ -61,6 +62,11 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
+  assets:
+    - assets/config.json
+    - assets/images/incorrect_card.jpg
+    - assets/images/correct_card.jpg
+    - assets/logo.png
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
@@ -97,3 +103,10 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/logo.png"
+  min_sdk_android: 21
+  adaptive_icon_background: "#6441A5"
+  adaptive_icon_foreground: "assets/logo.png"

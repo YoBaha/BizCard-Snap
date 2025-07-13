@@ -3,7 +3,7 @@ import 'package:stylish_bottom_bar/stylish_bottom_bar.dart';
 import 'package:bizcard_snap/pages/home_page.dart';
 import 'package:bizcard_snap/pages/camera_page.dart';
 import 'package:bizcard_snap/pages/card_vault_page.dart';
-import 'package:bizcard_snap/pages/ProfilePage.dart'; // Import ProfilePage
+import 'package:bizcard_snap/pages/ProfilePage.dart';
 import 'package:bizcard_snap/services/api_service.dart';
 
 class BottomNavBar extends StatefulWidget {
@@ -47,7 +47,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
           HomePage(),
           CameraPage(),
           CardVaultPage(),
-          ProfilePage(), // Add ProfilePage
+          ProfilePage(),
         ],
         onPageChanged: (index) {
           print('Page changed to index: $index');

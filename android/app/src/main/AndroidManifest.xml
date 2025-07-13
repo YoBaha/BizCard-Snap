@@ -10,7 +10,7 @@
             <data android:mimeType="text/plain"/>
         </intent>
         <intent>
-            <action android:name="android.intent.action.WEB_SEARCH" /> <!-- For Google search -->
+            <action android:name="android.intent.action.WEB_SEARCH" />
             <data android:scheme="https" />
         </intent>
         <intent>
@@ -19,7 +19,7 @@
         </intent>
     </queries>
     <application
-        android:label="bizcard_snap"
+        android:label="BizCardSnap"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

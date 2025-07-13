@@ -19,7 +19,7 @@ class _HomePageState extends State<HomePage> {
   Map<String, String> extractedData = {};
   bool isLoading = false;
 
-  // Fetch user data (username, email, card count) from API
+ 
   Future<Map<String, dynamic>> _fetchUserData() async {
     final userData = await _apiService.getCurrentUser();
     final cards = await _apiService.getCards();
@@ -176,7 +176,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     print('Building HomePage');
     return Scaffold(
-      backgroundColor: Colors.transparent, // Ensure Scaffold background is transparent
+      backgroundColor: Colors.transparent,
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
@@ -659,7 +659,7 @@ class _HomePageState extends State<HomePage> {
                           ),
                         ),
                         const SizedBox(height: 16),
-                        // Why Upload a Business Card? (Informational Section)
+                        
                         Container(
                           padding: const EdgeInsets.all(24.0),
                           margin: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -746,7 +746,7 @@ class _HomePageState extends State<HomePage> {
                           ),
                         ),
                         const SizedBox(height: 16),
-                        // Tips for Better Scans
+                        
                         Container(
                           margin: const EdgeInsets.symmetric(horizontal: 8.0),
                           decoration: BoxDecoration(
@@ -816,7 +816,7 @@ class _HomePageState extends State<HomePage> {
                             ],
                           ),
                         ),
-                        // Final padding to ensure content doesn't touch bottom
+                        
                         const SizedBox(height: 16),
                       ],
                     ),

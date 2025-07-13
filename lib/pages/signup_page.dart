@@ -118,15 +118,10 @@ class _SignupPageState extends State<SignupPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text(
-                    'BizCard Snap',
-                    style: TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                      letterSpacing: 1.2,
-                      decoration: TextDecoration.none,
-                    ),
+                  Image.asset(
+                    'assets/logo.png',
+                    width: 150,
+                    height: 150,
                   ),
                   const SizedBox(height: 10),
                   const Text(

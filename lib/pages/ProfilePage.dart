@@ -57,7 +57,7 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
             TextButton(
               onPressed: () async {
-                Navigator.of(context).pop(); // Close dialog
+                Navigator.of(context).pop();
                 final success = await _apiService.deleteAccount();
                 if (success) {
                   Navigator.pushReplacementNamed(context, '/login');

@@ -12,7 +12,7 @@ class _LoginPageState extends State<LoginPage> {
   final ApiService _apiService = ApiService();
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
-  bool _rememberMe = false; // Add this
+  bool _rememberMe = false;
   String? _errorMessage;
   bool _isLoading = false;
 
@@ -25,7 +25,7 @@ class _LoginPageState extends State<LoginPage> {
     final response = await _apiService.login(
       _usernameController.text,
       _passwordController.text,
-      rememberMe: _rememberMe, // Pass rememberMe
+      rememberMe: _rememberMe,
     );
 
     setState(() => _isLoading = false);
@@ -57,15 +57,10 @@ class _LoginPageState extends State<LoginPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text(
-                    'BizCard Snap',
-                    style: TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                      letterSpacing: 1.2,
-                      decoration: TextDecoration.none,
-                    ),
+                  Image.asset(
+                    'assets/logo.png',
+                    width: 150,
+                    height: 150,
                   ),
                   const SizedBox(height: 10),
                   const Text(

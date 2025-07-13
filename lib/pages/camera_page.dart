@@ -16,7 +16,196 @@ class _CameraPageState extends State<CameraPage> {
   bool _isLoading = false;
   Map<String, String> _extractedData = {};
 
+  Future<void> _showCameraGuide() async {
+    final PageController pageController = PageController();
+    final ValueNotifier<int> currentPageNotifier = ValueNotifier<int>(0);
+
+    await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        contentPadding: EdgeInsets.zero,
+        content: ValueListenableBuilder<int>(
+          valueListenable: currentPageNotifier,
+          builder: (context, currentPage, child) {
+            return SizedBox(
+              height: 400,
+              width: double.maxFinite,
+              child: Column(
+                children: [
+                  Expanded(
+                    child: PageView(
+                      controller: pageController,
+                      onPageChanged: (index) {
+                        print('Page changed to: $index');
+                        currentPageNotifier.value = index;
+                      },
+                      children: [
+                        // Page 1: Incorrect photo example
+                        Container(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Image.asset(
+                                'assets/images/incorrect_card.jpg',
+                                height: 200,
+                                fit: BoxFit.contain,
+                                errorBuilder: (context, error, stackTrace) => const Text(
+                                  'Failed to load image',
+                                  style: TextStyle(color: Colors.red),
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              const Text(
+                                'Incorrect Photo',
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              const Text(
+                                'Avoid blurry, misaligned, or poorly lit photos like this one.',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.black87,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              const Text(
+                                'Press Next to continue',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.black54,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        // Page 2: Correct photo example
+                        Container(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Image.asset(
+                                'assets/images/correct_card.jpg',
+                                height: 200,
+                                fit: BoxFit.contain,
+                                errorBuilder: (context, error, stackTrace) => const Text(
+                                  'Failed to load image',
+                                  style: TextStyle(color: Colors.red),
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              const Text(
+                                'Correct Photo',
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              const Text(
+                                'Take a clear, centered, and well-lit photo like this one.',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.black87,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              const Text(
+                                'Press Take Photo to continue',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.black54,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Page indicator dots
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(2, (index) => Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 4.0),
+                      width: 8.0,
+                      height: 8.0,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: currentPage == index ? Colors.teal : Colors.grey,
+                      ),
+                    )),
+                  ),
+                  const SizedBox(height: 16),
+                ],
+              ),
+            );
+          },
+        ),
+        actions: [
+          ValueListenableBuilder<int>(
+            valueListenable: currentPageNotifier,
+            builder: (context, currentPage, child) {
+              return Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  if (currentPage == 1)
+                    TextButton(
+                      onPressed: () {
+                        print('Back button pressed on page 1');
+                        pageController.previousPage(
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                        );
+                      },
+                      child: const Text('Back', style: TextStyle(color: Colors.teal)),
+                    ),
+                  ElevatedButton(
+                    onPressed: () {
+                      print('Button pressed on page $currentPage');
+                      if (currentPage == 0) {
+                        pageController.nextPage(
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                        );
+                      } else {
+                        Navigator.pop(context);
+                        _takePicture();
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.teal,
+                      foregroundColor: Colors.white,
+                      minimumSize: const Size(120, 48),
+                    ),
+                    child: Text(currentPage == 0 ? 'Next' : 'Take Photo'),
+                  ),
+                ],
+              );
+            },
+          ),
+        ],
+      ),
+    );
+
+    // Clean up
+    pageController.dispose();
+    currentPageNotifier.dispose();
+  }
+
   Future<void> _takePicture() async {
+    print('Opening camera');
     if (_apiService.token == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -158,7 +347,7 @@ class _CameraPageState extends State<CameraPage> {
               ),
             const SizedBox(height: 20),
             GestureDetector(
-              onTap: _isLoading ? null : _takePicture,
+              onTap: _isLoading ? null : _showCameraGuide,
               child: Container(
                 width: 200,
                 height: 60,

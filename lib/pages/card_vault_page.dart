@@ -27,7 +27,7 @@ class _CardVaultPageState extends State<CardVaultPage> {
 
     try {
       final token = _apiService.token!;
-      final userId = JwtDecoder.decode(token)['sub']; // Extract user ID from JWT
+      final userId = JwtDecoder.decode(token)['sub'];
       final response = await http.get(
         Uri.parse('${ApiService.baseUrl}/cards?user=$userId'),
         headers: {'Authorization': 'Bearer $token'},
@@ -59,53 +59,64 @@ class _CardVaultPageState extends State<CardVaultPage> {
     _fetchCards();
   }
 
-void _showCardDetails(Map<String, dynamic> card) {
-  showModalBottomSheet(
-    context: context,
-    backgroundColor: Colors.transparent,
-    builder: (context) => Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF6441A5), Color(0xFF2a0845)],
+  void _showCardDetails(Map<String, dynamic> card) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true, // Allow modal to take more space
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.6, //60% 
+        minChildSize: 0.3, 
+        maxChildSize: 0.9,
+        builder: (context, scrollController) => Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFF6441A5), Color(0xFF2a0845)],
+            ),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          padding: const EdgeInsets.all(16.0),
+          child: SingleChildScrollView(
+            controller: scrollController,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  card['person_name'] ?? 'Unknown',
+                  style: const TextStyle(
+                    fontSize: 24,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                _buildDetailRow('Company', card['company_name'] ?? ''),
+                _buildDetailRow('Job Title', card['job_title'] ?? ''),
+                _buildDetailRow('Phone', card['phone'] ?? ''),
+                _buildDetailRow('Email', card['email'] ?? ''),
+                _buildDetailRow('Address', card['address'] ?? ''),
+                if (card['qr_url']?.isNotEmpty == true)
+                  _buildDetailRow('QR URL', card['qr_url'] ?? ''),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.teal,
+                    foregroundColor: Colors.white,
+                  ),
+                  child: const Text('Close'),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            card['person_name'] ?? 'Unknown',
-            style: const TextStyle(
-              fontSize: 24,
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 10),
-          _buildDetailRow('Company', card['company_name'] ?? ''),
-          _buildDetailRow('Job Title', card['job_title'] ?? ''),
-          _buildDetailRow('Phone', card['phone'] ?? ''),
-          _buildDetailRow('Email', card['email'] ?? ''),
-          _buildDetailRow('Address', card['address'] ?? ''),
-          if (card['qr_url']?.isNotEmpty == true)
-            _buildDetailRow('QR URL', card['qr_url'] ?? ''),
-          const SizedBox(height: 20),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.teal,
-              foregroundColor: Colors.white,
-            ),
-          ),
-        ],
-      ),
-    ),
-  );
-}
+    );
+  }
+
   Widget _buildDetailRow(String label, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -120,7 +131,7 @@ void _showCardDetails(Map<String, dynamic> card) {
               fontSize: 16,
             ),
           ),
-          Expanded(
+          Flexible(
             child: Text(
               value,
               style: const TextStyle(
@@ -128,6 +139,8 @@ void _showCardDetails(Map<String, dynamic> card) {
                 fontSize: 16,
               ),
               softWrap: true,
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis, // Truncate with ellipsis
             ),
           ),
         ],
@@ -141,7 +154,7 @@ void _showCardDetails(Map<String, dynamic> card) {
     setState(() => _isLoading = true);
     try {
       final response = await http.delete(
-        Uri.parse('${ApiService.baseUrl}/cards?user=${JwtDecoder.decode(_apiService.token!)['sub']}&timestamp=$timestamp'), // Fixed typo and syntax
+        Uri.parse('${ApiService.baseUrl}/cards?timestamp=$timestamp'),
         headers: {'Authorization': 'Bearer ${_apiService.token}'},
       );
 
@@ -250,7 +263,7 @@ void _showCardDetails(Map<String, dynamic> card) {
                             icon: const Icon(Icons.delete, color: Colors.white),
                             onPressed: () => _deleteCard(index, card['timestamp']),
                           ),
-                          onTap: () => _showCardDetails(card), // Trigger detailed view
+                          onTap: () => _showCardDetails(card),
                         ),
                       );
                     },

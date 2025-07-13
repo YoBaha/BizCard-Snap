@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:http/http.dart' as http;
 import 'dart:io';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -9,15 +10,29 @@ class ApiService {
 
   ApiService._internal();
 
-  static const String _baseUrl = 'http://10.0.2.2:5000';
+  static String? _baseUrl; 
   String? _token;
 
-  static String get baseUrl => _baseUrl;
+  static String get baseUrl => _baseUrl ?? 'http://10.0.2.2:5000';
   String? get token => _token;
 
-  // Initialize ApiService and load token
+ 
   Future<void> init() async {
+    await _loadConfig();
     await _loadToken();
+  }
+
+  // Load baseUrl from config.json
+  Future<void> _loadConfig() async {
+    try {
+      final configString = await rootBundle.loadString('assets/config.json');
+      final config = jsonDecode(configString);
+      _baseUrl = config['baseUrl'];
+      print('Loaded baseUrl: $_baseUrl');
+    } catch (e) {
+      print('Error loading config: $e');
+      _baseUrl = 'http://10.0.2.2:5000';
+    }
   }
 
   Future<void> _loadToken() async {
@@ -91,6 +106,7 @@ class ApiService {
     }
     return null;
   }
+
   Future<Map<String, dynamic>?> signup(String username, String email, String password) async {
     final passwordError = _validatePassword(password);
     if (passwordError != null) {
