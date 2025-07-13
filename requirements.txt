@@ -1,7 +1,11 @@
-streamlit
+flask
+gunicorn
 easyocr
-pandas
-pillow
-numpy
 gliner
 transformers
+pymongo
+pillow
+numpy
+flask-jwt-extended
+bcrypt
+python-dotenv
