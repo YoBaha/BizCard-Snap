@@ -112,15 +112,18 @@ def signup():
     password = data.get('password')
 
     if not username or not email or not password:
-        return jsonify({"error": "Missing required fields"}), 400
+        return jsonify({"success": False, "message": "Missing required fields"}), 400
 
     if users_collection.find_one({"username": username}):
-        return jsonify({"error": "Username already exists"}), 400
+        return jsonify({"success": False, "message": "Username already exists"}), 400
+
+    if users_collection.find_one({"email": email}):
+        return jsonify({"success": False, "message": "Email address already exists"}), 400
 
     hashed_password = generate_password_hash(password)
     user_data = {"username": username, "email": email, "password": hashed_password}
     users_collection.insert_one(user_data)
-    return jsonify({"message": "User created successfully", "username": username}), 201
+    return jsonify({"success": True, "message": "User created successfully", "username": username}), 201
 
 @app.route('/login', methods=['POST'])
 def login():
