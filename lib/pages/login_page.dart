@@ -12,6 +12,7 @@ class _LoginPageState extends State<LoginPage> {
   final ApiService _apiService = ApiService();
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
+  bool _rememberMe = false; // Add this
   String? _errorMessage;
   bool _isLoading = false;
 
@@ -24,6 +25,7 @@ class _LoginPageState extends State<LoginPage> {
     final response = await _apiService.login(
       _usernameController.text,
       _passwordController.text,
+      rememberMe: _rememberMe, // Pass rememberMe
     );
 
     setState(() => _isLoading = false);
@@ -127,6 +129,27 @@ class _LoginPageState extends State<LoginPage> {
                           obscureText: true,
                         ),
                         const SizedBox(height: 10),
+                        Row(
+                          children: [
+                            Checkbox(
+                              value: _rememberMe,
+                              onChanged: (value) {
+                                setState(() => _rememberMe = value ?? false);
+                              },
+                              checkColor: Colors.white,
+                              fillColor: MaterialStateProperty.resolveWith((states) =>
+                                  states.contains(MaterialState.selected) ? Colors.green : Colors.white70),
+                            ),
+                            const Text(
+                              'Remember Me',
+                              style: TextStyle(
+                                color: Colors.white70,
+                                fontSize: 14,
+                                decoration: TextDecoration.none,
+                              ),
+                            ),
+                          ],
+                        ),
                         Align(
                           alignment: Alignment.centerRight,
                           child: TextButton(

@@ -1,10 +1,12 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'dart:io';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
   static final ApiService _instance = ApiService._internal();
   factory ApiService() => _instance;
+
   ApiService._internal();
 
   static const String _baseUrl = 'http://10.0.2.2:5000';
@@ -13,7 +15,76 @@ class ApiService {
   static String get baseUrl => _baseUrl;
   String? get token => _token;
 
-  // Password validation: minimum 8 characters
+  // Initialize ApiService and load token
+  Future<void> init() async {
+    await _loadToken();
+  }
+
+  Future<void> _loadToken() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      _token = prefs.getString('jwt_token');
+      print('Loaded token: $_token');
+      if (_token == null) {
+        print('No token found in SharedPreferences');
+      } else {
+        print('Token successfully loaded: $_token');
+      }
+    } catch (e) {
+      print('Error loading token: $e');
+    }
+  }
+
+  Future<void> _saveToken(String token) async {
+    try {
+      print('Attempting to save token: $token');
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('jwt_token', token);
+      _token = token;
+      print('Saved token: $token');
+      final savedToken = prefs.getString('jwt_token');
+      print('Verified saved token: $savedToken');
+    } catch (e) {
+      print('Error saving token: $e');
+    }
+  }
+
+  Future<void> _clearToken() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('jwt_token');
+      _token = null;
+      print('Cleared token');
+    } catch (e) {
+      print('Error clearing token: $e');
+    }
+  }
+
+  Future<bool> isAuthenticated() async {
+    if (_token == null) {
+      print('No token available in isAuthenticated');
+      return false;
+    }
+    try {
+      print('Attempting to validate token: $_token');
+      final response = await http.get(
+        Uri.parse('$_baseUrl/validate-token'),
+        headers: {'Authorization': 'Bearer $_token'},
+      );
+      print('Validate token response: ${response.statusCode} - ${response.body}');
+      if (response.statusCode == 200) {
+        print('Token validation successful');
+        return true;
+      } else {
+        print('Token validation failed: ${response.statusCode} - ${response.body}');
+        return false;
+      }
+    } catch (e) {
+      print('Token validation error: $e');
+      return false;
+    }
+  }
+
   String? _validatePassword(String password) {
     if (password.length < 8) {
       return 'Password must be at least 8 characters long';
@@ -36,10 +107,10 @@ class ApiService {
     if (response.statusCode == 201) {
       return jsonDecode(response.body);
     }
-    return jsonDecode(response.body); // Return error response for handling
+    return jsonDecode(response.body);
   }
 
-  Future<Map<String, dynamic>?> login(String username, String password) async {
+  Future<Map<String, dynamic>?> login(String username, String password, {bool rememberMe = false}) async {
     final passwordError = _validatePassword(password);
     if (passwordError != null) {
       return {'success': false, 'message': passwordError};
@@ -53,11 +124,15 @@ class ApiService {
     print('Login response: ${response.statusCode} - ${response.body}');
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      _token = data['access_token'];
-      print('Token set: $_token');
+      if (rememberMe) {
+        await _saveToken(data['access_token']);
+      } else {
+        _token = data['access_token'];
+        print('Token set in memory (no persistence): $_token');
+      }
       return data;
     }
-    return jsonDecode(response.body); // Return error response for handling
+    return jsonDecode(response.body);
   }
 
   Future<Map<String, dynamic>?> sendResetCode(String email) async {
@@ -136,7 +211,7 @@ class ApiService {
   }
 
   Future<void> logout() async {
-    _token = null;
+    await _clearToken();
     print('Logged out, token cleared');
   }
 
@@ -151,7 +226,7 @@ class ApiService {
     );
     print('Delete account response: ${response.statusCode} - ${response.body}');
     if (response.statusCode == 200) {
-      _token = null;
+      await _clearToken();
       return true;
     }
     return false;
