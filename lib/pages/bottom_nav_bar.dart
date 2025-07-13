@@ -3,6 +3,7 @@ import 'package:stylish_bottom_bar/stylish_bottom_bar.dart';
 import 'package:bizcard_snap/pages/home_page.dart';
 import 'package:bizcard_snap/pages/camera_page.dart';
 import 'package:bizcard_snap/pages/card_vault_page.dart';
+import 'package:bizcard_snap/pages/ProfilePage.dart'; // Import ProfilePage
 import 'package:bizcard_snap/services/api_service.dart';
 
 class BottomNavBar extends StatefulWidget {
@@ -46,6 +47,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
           HomePage(),
           CameraPage(),
           CardVaultPage(),
+          ProfilePage(), // Add ProfilePage
         ],
         onPageChanged: (index) {
           print('Page changed to index: $index');
@@ -127,6 +129,28 @@ class _BottomNavBarState extends State<BottomNavBar> {
               child: const Icon(Icons.card_travel, color: Colors.white),
             ),
           ),
+          BottomBarItem(
+            icon: const Icon(Icons.person, color: Colors.white70),
+            title: const Text(
+              'Profile',
+              style: TextStyle(color: Colors.white70, decoration: TextDecoration.none),
+            ),
+            backgroundColor: const Color(0xFF2a0845),
+            selectedColor: Colors.white,
+            selectedIcon: Container(
+              width: 40,
+              height: 40,
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Color(0xFF11998e), Color(0xFF38ef7d)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.person, color: Colors.white),
+            ),
+          ),
         ],
         currentIndex: selected,
         onTap: (index) {
@@ -140,27 +164,6 @@ class _BottomNavBarState extends State<BottomNavBar> {
         backgroundColor: const Color(0xFF2a0845),
         elevation: 8,
       ),
-      // Comment out StylishBottomBar and uncomment this to test with standard BottomNavigationBar
-      /*
-      bottomNavigationBar: BottomNavigationBar(
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.camera_alt), label: 'Camera'),
-          BottomNavigationBarItem(icon: Icon(Icons.card_travel), label: 'Card Vault'),
-        ],
-        currentIndex: selected,
-        backgroundColor: Color(0xFF2a0845),
-        selectedItemColor: Colors.white,
-        unselectedItemColor: Colors.white70,
-        onTap: (index) {
-          print('Nav bar item tapped: $index');
-          setState(() {
-            selected = index;
-            controller.jumpToPage(index);
-          });
-        },
-      ),
-      */
     );
   }
 }

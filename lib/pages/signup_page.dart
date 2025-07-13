@@ -13,10 +13,18 @@ class _SignupPageState extends State<SignupPage> {
   final _usernameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController(); // New controller for confirm password
   String? _errorMessage;
 
   Future<void> _signup() async {
     setState(() => _errorMessage = null);
+
+    // Validate passwords match
+    if (_passwordController.text != _confirmPasswordController.text) {
+      setState(() => _errorMessage = 'Passwords do not match.');
+      return;
+    }
+
     final response = await _apiService.signup(
       _usernameController.text,
       _emailController.text,
@@ -91,6 +99,21 @@ class _SignupPageState extends State<SignupPage> {
                     width: double.infinity,
                     child: Column(
                       children: [
+                        Row(
+                          children: [
+                            const Expanded(
+                              child: Text(
+                                'Username (WILL BE USED TO LOGIN LATER)',
+                                style: TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w400,
+                                  decoration: TextDecoration.none,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                         TextField(
                           controller: _usernameController,
                           style: const TextStyle(color: Colors.white, decoration: TextDecoration.none),
@@ -126,6 +149,22 @@ class _SignupPageState extends State<SignupPage> {
                           style: const TextStyle(color: Colors.white, decoration: TextDecoration.none),
                           decoration: InputDecoration(
                             labelText: 'Password',
+                            labelStyle: const TextStyle(color: Colors.white70, decoration: TextDecoration.none),
+                            filled: true,
+                            fillColor: Colors.white.withOpacity(0.1),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide.none,
+                            ),
+                          ),
+                          obscureText: true,
+                        ),
+                        const SizedBox(height: 16),
+                        TextField(
+                          controller: _confirmPasswordController,
+                          style: const TextStyle(color: Colors.white, decoration: TextDecoration.none),
+                          decoration: InputDecoration(
+                            labelText: 'Confirm Password',
                             labelStyle: const TextStyle(color: Colors.white70, decoration: TextDecoration.none),
                             filled: true,
                             fillColor: Colors.white.withOpacity(0.1),

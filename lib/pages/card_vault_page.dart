@@ -59,52 +59,53 @@ class _CardVaultPageState extends State<CardVaultPage> {
     _fetchCards();
   }
 
-  void _showCardDetails(Map<String, dynamic> card) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFF6441A5), Color(0xFF2a0845)],
-          ),
-        ),
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              card['person_name'] ?? 'Unknown',
-              style: const TextStyle(
-                fontSize: 24,
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 10),
-            _buildDetailRow('Company', card['company_name'] ?? ''),
-            _buildDetailRow('Job Title', card['job_title'] ?? ''),
-            _buildDetailRow('Phone', card['phone'] ?? ''),
-            _buildDetailRow('Email', card['email'] ?? ''),
-            _buildDetailRow('Address', card['address'] ?? ''),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Close'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.teal,
-                foregroundColor: Colors.white,
-              ),
-            ),
-          ],
+void _showCardDetails(Map<String, dynamic> card) {
+  showModalBottomSheet(
+    context: context,
+    backgroundColor: Colors.transparent,
+    builder: (context) => Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF6441A5), Color(0xFF2a0845)],
         ),
       ),
-    );
-  }
-
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            card['person_name'] ?? 'Unknown',
+            style: const TextStyle(
+              fontSize: 24,
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 10),
+          _buildDetailRow('Company', card['company_name'] ?? ''),
+          _buildDetailRow('Job Title', card['job_title'] ?? ''),
+          _buildDetailRow('Phone', card['phone'] ?? ''),
+          _buildDetailRow('Email', card['email'] ?? ''),
+          _buildDetailRow('Address', card['address'] ?? ''),
+          if (card['qr_url']?.isNotEmpty == true)
+            _buildDetailRow('QR URL', card['qr_url'] ?? ''),
+          const SizedBox(height: 20),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.teal,
+              foregroundColor: Colors.white,
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
   Widget _buildDetailRow(String label, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),

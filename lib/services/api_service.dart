@@ -67,4 +67,62 @@ class ApiService {
     }
     return null;
   }
+
+  // New method to get current user data
+  Future<Map<String, String>?> getCurrentUser() async {
+    if (_token == null) {
+      print('No token available');
+      return null;
+    }
+    final response = await http.get(
+      Uri.parse('$_baseUrl/current_user'),
+      headers: {'Authorization': 'Bearer $_token'},
+    );
+    print('Get user response: ${response.statusCode} - ${response.body}');
+    if (response.statusCode == 200) {
+      return Map<String, String>.from(jsonDecode(response.body));
+    }
+    return null;
+  }
+
+  // New method to logout (clears token)
+  Future<void> logout() async {
+    _token = null; // Simply clear the token on the client side
+    print('Logged out, token cleared');
+  }
+
+  // New method to delete account
+  Future<bool> deleteAccount() async {
+    if (_token == null) {
+      print('No token available');
+      return false;
+    }
+    final response = await http.delete(
+      Uri.parse('$_baseUrl/delete_account'),
+      headers: {'Authorization': 'Bearer $_token'},
+    );
+    print('Delete account response: ${response.statusCode} - ${response.body}');
+    if (response.statusCode == 200) {
+      _token = null; // Clear token on success
+      return true;
+    }
+    return false;
+  }
+
+  Future<List<dynamic>?> getCards() async {
+    if (_token == null) {
+      print('No token available');
+      return null;
+    }
+    final response = await http.get(
+      Uri.parse('$_baseUrl/cards'),
+      headers: {'Authorization': 'Bearer $_token'},
+    );
+    print('Get cards response: ${response.statusCode} - ${response.body}');
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    }
+    return null;
+  }
+
 }
