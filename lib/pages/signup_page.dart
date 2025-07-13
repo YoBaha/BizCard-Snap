@@ -17,11 +17,33 @@ class _SignupPageState extends State<SignupPage> {
   String? _errorMessage;
   bool _isLoading = false;
 
+  // Validate email format
+  String? _validateEmail(String email) {
+    final regex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+    if (!regex.hasMatch(email)) {
+      return 'Please enter a valid email address';
+    }
+    return null;
+  }
+
   Future<void> _signup() async {
     setState(() {
       _errorMessage = null;
       _isLoading = true;
     });
+
+    // Validate email format
+    final emailError = _validateEmail(_emailController.text);
+    if (emailError != null) {
+      setState(() {
+        _errorMessage = emailError;
+        _isLoading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(emailError)),
+      );
+      return;
+    }
 
     // Validate passwords match
     if (_passwordController.text != _confirmPasswordController.text) {
@@ -29,6 +51,9 @@ class _SignupPageState extends State<SignupPage> {
         _errorMessage = 'Passwords do not match';
         _isLoading = false;
       });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Passwords do not match')),
+      );
       return;
     }
 
@@ -38,17 +63,40 @@ class _SignupPageState extends State<SignupPage> {
       _passwordController.text,
     );
 
-    setState(() => _isLoading = false);
+    setState(() {
+      _isLoading = false;
+    });
 
-    if (response != null && response['success'] != false) {
+    if (response != null && response['success'] == true) {
       print('Navigating to /login');
       Navigator.pushReplacementNamed(context, '/login');
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Signup successful! Please log in.')),
+        const SnackBar(
+          content: Text('Signup successful! Please log in.'),
+          backgroundColor: Colors.green,
+        ),
       );
     } else {
-      setState(() => _errorMessage = response?['message'] ?? 'Signup failed. Username may exist.');
+      final errorMessage = response?['message'] ?? 'Signup failed';
+      setState(() {
+        _errorMessage = errorMessage;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(errorMessage),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
     }
+  }
+
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    super.dispose();
   }
 
   @override

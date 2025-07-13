@@ -91,23 +91,28 @@ class ApiService {
     }
     return null;
   }
-
   Future<Map<String, dynamic>?> signup(String username, String email, String password) async {
     final passwordError = _validatePassword(password);
     if (passwordError != null) {
       return {'success': false, 'message': passwordError};
     }
 
-    final response = await http.post(
-      Uri.parse('$_baseUrl/signup'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'username': username, 'email': email, 'password': password}),
-    );
-    print('Signup response: ${response.statusCode} - ${response.body}');
-    if (response.statusCode == 201) {
-      return jsonDecode(response.body);
+    try {
+      final response = await http.post(
+        Uri.parse('$_baseUrl/signup'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'username': username, 'email': email, 'password': password}),
+      );
+      print('Signup response: ${response.statusCode} - ${response.body}');
+      final responseData = jsonDecode(response.body);
+      if (response.statusCode == 201 && responseData['success'] == true) {
+        return responseData;
+      }
+      return {'success': false, 'message': responseData['message'] ?? 'Signup failed'};
+    } catch (e) {
+      print('Signup error: $e');
+      return {'success': false, 'message': 'Network error: $e'};
     }
-    return jsonDecode(response.body);
   }
 
   Future<Map<String, dynamic>?> login(String username, String password, {bool rememberMe = false}) async {
