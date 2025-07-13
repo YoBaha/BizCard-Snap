@@ -1,44 +1,43 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+class ForgotPasswordPage extends StatefulWidget {
+  const ForgotPasswordPage({super.key});
 
   @override
-  _LoginPageState createState() => _LoginPageState();
+  _ForgotPasswordPageState createState() => _ForgotPasswordPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   final ApiService _apiService = ApiService();
-  final _usernameController = TextEditingController();
-  final _passwordController = TextEditingController();
+  final _emailController = TextEditingController();
   String? _errorMessage;
   bool _isLoading = false;
 
-  Future<void> _login() async {
+  Future<void> _sendResetCode() async {
     setState(() {
       _errorMessage = null;
       _isLoading = true;
     });
 
-    final response = await _apiService.login(
-      _usernameController.text,
-      _passwordController.text,
-    );
-
+    final response = await _apiService.sendResetCode(_emailController.text);
     setState(() => _isLoading = false);
 
-    if (response != null && response['success'] != false) {
-      print('Navigating to /home');
-      Navigator.pushReplacementNamed(context, '/home');
+    if (response != null && response['success'] == true) {
+      Navigator.pushNamed(
+        context,
+        '/reset-password',
+        arguments: {'email': _emailController.text},
+      );
     } else {
-      setState(() => _errorMessage = response?['message'] ?? 'Login failed. Check credentials.');
+      setState(() {
+        _errorMessage = response?['message'] ?? 'Failed to send reset code';
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    print('Building LoginPage');
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
@@ -56,18 +55,17 @@ class _LoginPageState extends State<LoginPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Text(
-                    'BizCard Snap',
+                    'Forgot Password',
                     style: TextStyle(
                       fontSize: 32,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
-                      letterSpacing: 1.2,
                       decoration: TextDecoration.none,
                     ),
                   ),
                   const SizedBox(height: 10),
                   const Text(
-                    'Log in to start scanning',
+                    'Enter your email to receive a reset code',
                     style: TextStyle(
                       fontSize: 16,
                       color: Colors.white70,
@@ -97,10 +95,10 @@ class _LoginPageState extends State<LoginPage> {
                     child: Column(
                       children: [
                         TextField(
-                          controller: _usernameController,
+                          controller: _emailController,
                           style: const TextStyle(color: Colors.white, decoration: TextDecoration.none),
                           decoration: InputDecoration(
-                            labelText: 'Username',
+                            labelText: 'Email',
                             labelStyle: const TextStyle(color: Colors.white70, decoration: TextDecoration.none),
                             filled: true,
                             fillColor: Colors.white.withOpacity(0.1),
@@ -109,43 +107,11 @@ class _LoginPageState extends State<LoginPage> {
                               borderSide: BorderSide.none,
                             ),
                           ),
+                          keyboardType: TextInputType.emailAddress,
                         ),
-                        const SizedBox(height: 16),
-                        TextField(
-                          controller: _passwordController,
-                          style: const TextStyle(color: Colors.white, decoration: TextDecoration.none),
-                          decoration: InputDecoration(
-                            labelText: 'Password',
-                            labelStyle: const TextStyle(color: Colors.white70, decoration: TextDecoration.none),
-                            filled: true,
-                            fillColor: Colors.white.withOpacity(0.1),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide.none,
-                            ),
-                          ),
-                          obscureText: true,
-                        ),
-                        const SizedBox(height: 10),
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: TextButton(
-                            onPressed: () {
-                              Navigator.pushNamed(context, '/forgot-password');
-                            },
-                            child: const Text(
-                              'Forgot Password?',
-                              style: TextStyle(
-                                color: Colors.white70,
-                                fontSize: 14,
-                                decoration: TextDecoration.none,
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 10),
+                        const SizedBox(height: 20),
                         GestureDetector(
-                          onTap: _isLoading ? null : _login,
+                          onTap: _isLoading ? null : _sendResetCode,
                           child: Container(
                             width: double.infinity,
                             height: 50,
@@ -168,7 +134,7 @@ class _LoginPageState extends State<LoginPage> {
                               child: _isLoading
                                   ? const CircularProgressIndicator(color: Colors.white)
                                   : const Text(
-                                      'Login',
+                                      'Send Reset Code',
                                       style: TextStyle(
                                         fontSize: 18,
                                         fontWeight: FontWeight.w600,
@@ -197,11 +163,9 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   const SizedBox(height: 20),
                   TextButton(
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/signup');
-                    },
+                    onPressed: () => Navigator.pop(context),
                     child: const Text(
-                      "Don't have an account? Sign up",
+                      'Back to Login',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 16,

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:bizcard_snap/services/api_service.dart';
+import '../services/api_service.dart';
 
 class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
@@ -13,15 +13,22 @@ class _SignupPageState extends State<SignupPage> {
   final _usernameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  final _confirmPasswordController = TextEditingController(); // New controller for confirm password
+  final _confirmPasswordController = TextEditingController();
   String? _errorMessage;
+  bool _isLoading = false;
 
   Future<void> _signup() async {
-    setState(() => _errorMessage = null);
+    setState(() {
+      _errorMessage = null;
+      _isLoading = true;
+    });
 
     // Validate passwords match
     if (_passwordController.text != _confirmPasswordController.text) {
-      setState(() => _errorMessage = 'Passwords do not match.');
+      setState(() {
+        _errorMessage = 'Passwords do not match';
+        _isLoading = false;
+      });
       return;
     }
 
@@ -30,12 +37,17 @@ class _SignupPageState extends State<SignupPage> {
       _emailController.text,
       _passwordController.text,
     );
-    print('Signup response: $response');
-    if (response != null) {
+
+    setState(() => _isLoading = false);
+
+    if (response != null && response['success'] != false) {
       print('Navigating to /login');
       Navigator.pushReplacementNamed(context, '/login');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Signup successful! Please log in.')),
+      );
     } else {
-      setState(() => _errorMessage = 'Signup failed. Username may exist.');
+      setState(() => _errorMessage = response?['message'] ?? 'Signup failed. Username may exist.');
     }
   }
 
@@ -142,6 +154,7 @@ class _SignupPageState extends State<SignupPage> {
                               borderSide: BorderSide.none,
                             ),
                           ),
+                          keyboardType: TextInputType.emailAddress,
                         ),
                         const SizedBox(height: 16),
                         TextField(
@@ -177,7 +190,7 @@ class _SignupPageState extends State<SignupPage> {
                         ),
                         const SizedBox(height: 20),
                         GestureDetector(
-                          onTap: _signup,
+                          onTap: _isLoading ? null : _signup,
                           child: Container(
                             width: double.infinity,
                             height: 50,
@@ -196,16 +209,18 @@ class _SignupPageState extends State<SignupPage> {
                                 ),
                               ],
                             ),
-                            child: const Center(
-                              child: Text(
-                                'Sign Up',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.white,
-                                  decoration: TextDecoration.none,
-                                ),
-                              ),
+                            child: Center(
+                              child: _isLoading
+                                  ? const CircularProgressIndicator(color: Colors.white)
+                                  : const Text(
+                                      'Sign Up',
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.white,
+                                        decoration: TextDecoration.none,
+                                      ),
+                                    ),
                             ),
                           ),
                         ),
@@ -227,9 +242,7 @@ class _SignupPageState extends State<SignupPage> {
                   ),
                   const SizedBox(height: 20),
                   TextButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
+                    onPressed: () => Navigator.pop(context),
                     child: const Text(
                       'Already have an account? Login',
                       style: TextStyle(

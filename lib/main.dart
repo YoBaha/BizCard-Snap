@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'pages/login_page.dart';
 import 'pages/signup_page.dart';
 import 'pages/bottom_nav_bar.dart';
+import 'pages/forgot_password_page.dart';
+import 'pages/reset_password_page.dart';
 
 void main() {
   runApp(const BizCardSnapApp());
@@ -41,6 +43,8 @@ class BizCardSnapApp extends StatelessWidget {
         '/login': (context) => const LoginPage(),
         '/signup': (context) => const SignupPage(),
         '/home': (context) => const BottomNavBar(),
+        '/forgot-password': (context) => const ForgotPasswordPage(),
+        '/reset-password': (context) => const ResetPasswordPage(),
       },
     );
   }

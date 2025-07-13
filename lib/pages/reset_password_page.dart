@@ -1,44 +1,69 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+class ResetPasswordPage extends StatefulWidget {
+  const ResetPasswordPage({super.key});
 
   @override
-  _LoginPageState createState() => _LoginPageState();
+  _ResetPasswordPageState createState() => _ResetPasswordPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _ResetPasswordPageState extends State<ResetPasswordPage> {
   final ApiService _apiService = ApiService();
-  final _usernameController = TextEditingController();
-  final _passwordController = TextEditingController();
+  final _codeController = TextEditingController();
+  final _newPasswordController = TextEditingController();
   String? _errorMessage;
   bool _isLoading = false;
+  late String _email;
 
-  Future<void> _login() async {
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    _email = args?['email'] ?? '';
+  }
+
+  Future<void> _verifyAndResetPassword() async {
     setState(() {
       _errorMessage = null;
       _isLoading = true;
     });
 
-    final response = await _apiService.login(
-      _usernameController.text,
-      _passwordController.text,
+    // Verify the reset code
+    final verifyResponse = await _apiService.verifyResetCode(
+      _email,
+      _codeController.text,
     );
 
-    setState(() => _isLoading = false);
+    if (verifyResponse != null && verifyResponse['success'] == true) {
+      // Code verified, proceed to reset password
+      final resetResponse = await _apiService.resetPassword(
+        _email,
+        _newPasswordController.text,
+      );
 
-    if (response != null && response['success'] != false) {
-      print('Navigating to /home');
-      Navigator.pushReplacementNamed(context, '/home');
+      setState(() => _isLoading = false);
+
+      if (resetResponse != null && resetResponse['success'] == true) {
+        Navigator.pushReplacementNamed(context, '/login');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Password reset successfully')),
+        );
+      } else {
+        setState(() {
+          _errorMessage = resetResponse?['message'] ?? 'Failed to reset password';
+        });
+      }
     } else {
-      setState(() => _errorMessage = response?['message'] ?? 'Login failed. Check credentials.');
+      setState(() {
+        _isLoading = false;
+        _errorMessage = verifyResponse?['message'] ?? 'Invalid or expired code';
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    print('Building LoginPage');
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
@@ -56,18 +81,17 @@ class _LoginPageState extends State<LoginPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Text(
-                    'BizCard Snap',
+                    'Reset Password',
                     style: TextStyle(
                       fontSize: 32,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
-                      letterSpacing: 1.2,
                       decoration: TextDecoration.none,
                     ),
                   ),
                   const SizedBox(height: 10),
                   const Text(
-                    'Log in to start scanning',
+                    'Enter the code and your new password',
                     style: TextStyle(
                       fontSize: 16,
                       color: Colors.white70,
@@ -97,10 +121,10 @@ class _LoginPageState extends State<LoginPage> {
                     child: Column(
                       children: [
                         TextField(
-                          controller: _usernameController,
+                          controller: _codeController,
                           style: const TextStyle(color: Colors.white, decoration: TextDecoration.none),
                           decoration: InputDecoration(
-                            labelText: 'Username',
+                            labelText: 'Reset Code',
                             labelStyle: const TextStyle(color: Colors.white70, decoration: TextDecoration.none),
                             filled: true,
                             fillColor: Colors.white.withOpacity(0.1),
@@ -109,13 +133,15 @@ class _LoginPageState extends State<LoginPage> {
                               borderSide: BorderSide.none,
                             ),
                           ),
+                          keyboardType: TextInputType.number,
+                          maxLength: 4,
                         ),
                         const SizedBox(height: 16),
                         TextField(
-                          controller: _passwordController,
+                          controller: _newPasswordController,
                           style: const TextStyle(color: Colors.white, decoration: TextDecoration.none),
                           decoration: InputDecoration(
-                            labelText: 'Password',
+                            labelText: 'New Password',
                             labelStyle: const TextStyle(color: Colors.white70, decoration: TextDecoration.none),
                             filled: true,
                             fillColor: Colors.white.withOpacity(0.1),
@@ -126,26 +152,9 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                           obscureText: true,
                         ),
-                        const SizedBox(height: 10),
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: TextButton(
-                            onPressed: () {
-                              Navigator.pushNamed(context, '/forgot-password');
-                            },
-                            child: const Text(
-                              'Forgot Password?',
-                              style: TextStyle(
-                                color: Colors.white70,
-                                fontSize: 14,
-                                decoration: TextDecoration.none,
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 10),
+                        const SizedBox(height: 20),
                         GestureDetector(
-                          onTap: _isLoading ? null : _login,
+                          onTap: _isLoading ? null : _verifyAndResetPassword,
                           child: Container(
                             width: double.infinity,
                             height: 50,
@@ -168,7 +177,7 @@ class _LoginPageState extends State<LoginPage> {
                               child: _isLoading
                                   ? const CircularProgressIndicator(color: Colors.white)
                                   : const Text(
-                                      'Login',
+                                      'Reset Password',
                                       style: TextStyle(
                                         fontSize: 18,
                                         fontWeight: FontWeight.w600,
@@ -197,11 +206,9 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   const SizedBox(height: 20),
                   TextButton(
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/signup');
-                    },
+                    onPressed: () => Navigator.pop(context),
                     child: const Text(
-                      "Don't have an account? Sign up",
+                      'Back to Login',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 16,
