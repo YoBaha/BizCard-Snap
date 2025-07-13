@@ -9,3 +9,6 @@ numpy
 flask-jwt-extended
 bcrypt
 python-dotenv
+opencv-python-headless
+pandas
+werkzeug
