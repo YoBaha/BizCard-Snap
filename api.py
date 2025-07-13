@@ -130,10 +130,16 @@ def login():
 
     user = users_collection.find_one({"username": username})
     if not user or not check_password_hash(user['password'], password):
-        return jsonify({"error": "Invalid credentials"}), 401
+        return jsonify({"success": False, "message": "Invalid credentials"}), 401
 
-    access_token = create_access_token(identity=username)
-    return jsonify({"message": "Login successful", "access_token": access_token}), 200
+    access_token = create_access_token(identity=username, expires_delta=timedelta(days=30))
+    return jsonify({"success": True, "message": "Login successful", "access_token": access_token}), 200
+
+@app.route('/validate-token', methods=['GET'])
+@jwt_required()
+def validate_token():
+    current_user = get_jwt_identity()
+    return jsonify({"success": True, "message": "Token is valid", "username": current_user}), 200
 
 #_________________________________________________________
 def send_reset_email(email, code):
