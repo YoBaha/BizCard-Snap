@@ -495,7 +495,7 @@ class _HomePageState extends State<HomePage> {
                           margin: const EdgeInsets.symmetric(horizontal: 8.0),
                           decoration: BoxDecoration(
                             gradient: const LinearGradient(
-                              colors: [Color(0xFFE52D27), Color(0xFFB31217)],
+                              colors: [Color(0xFFFF8008), Color(0xFFFFC837)],
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
                             ),
@@ -658,7 +658,165 @@ class _HomePageState extends State<HomePage> {
                             ],
                           ),
                         ),
-                        // Add padding to ensure content doesn't touch bottom
+                        const SizedBox(height: 16),
+                        // Why Upload a Business Card? (Informational Section)
+                        Container(
+                          padding: const EdgeInsets.all(24.0),
+                          margin: const EdgeInsets.symmetric(horizontal: 8.0),
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [Color(0xFF2B32B2), Color(0xFF1488CC)],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.15),
+                                blurRadius: 12,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Why Upload a Business Card?',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF18181B),
+                                  decoration: TextDecoration.none,
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              const Text(
+                                'Digitizing your business card helps you:',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.white,
+                                  decoration: TextDecoration.none,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              const Text(
+                                '• Keep contacts organized',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.white,
+                                  decoration: TextDecoration.none,
+                                ),
+                              ),
+                              const Text(
+                                '• Instantly extract key information',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.white,
+                                  decoration: TextDecoration.none,
+                                ),
+                              ),
+                              const Text(
+                                '• Never lose a connection',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.white,
+                                  decoration: TextDecoration.none,
+                                ),
+                              ),
+                              const Text(
+                                '• Easily share your professional identity',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.white,
+                                  decoration: TextDecoration.none,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              const Text(
+                                'Secure, fast, and paperless.',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w500,
+                                  decoration: TextDecoration.none,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        // Tips for Better Scans
+                        Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 8.0),
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [Color(0xFF2B32B2), Color(0xFF1488CC)],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.15),
+                                blurRadius: 12,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: ExpansionTile(
+                            title: const Text(
+                              'Tips for Better Scans',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF18181B),
+                                decoration: TextDecoration.none,
+                              ),
+                            ),
+                            collapsedBackgroundColor: Colors.transparent,
+                            backgroundColor: Colors.transparent,
+                            iconColor: Colors.white,
+                            collapsedIconColor: Colors.white,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.all(24.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: const [
+                                    Text(
+                                      '📷 Use natural light',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        color: Colors.white,
+                                        decoration: TextDecoration.none,
+                                      ),
+                                    ),
+                                    SizedBox(height: 8),
+                                    Text(
+                                      '🔍 Align card properly',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        color: Colors.white,
+                                        decoration: TextDecoration.none,
+                                      ),
+                                    ),
+                                    SizedBox(height: 8),
+                                    Text(
+                                      '💡 Avoid blurry images',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        color: Colors.white,
+                                        decoration: TextDecoration.none,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        // Final padding to ensure content doesn't touch bottom
                         const SizedBox(height: 16),
                       ],
                     ),
