@@ -268,4 +268,31 @@ class ApiService {
     }
     return null;
   }
+
+
+Future<Map<String, dynamic>?> updateCard(String timestamp, Map<String, String> updates) async {
+  if (_token == null) {
+    print('No token available');
+    return {'success': false, 'message': 'No token available'};
+  }
+  try {
+    final response = await http.put(
+      Uri.parse('$_baseUrl/update_card'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $_token',
+      },
+      body: jsonEncode({
+        'timestamp': timestamp,
+        'updates': updates,
+      }),
+    );
+    print('Update card response: ${response.statusCode} - ${response.body}');
+    return jsonDecode(response.body);
+  } catch (e) {
+    print('Update card error: $e');
+    return {'success': false, 'message': 'Network error: $e'};
+  }
+}
+
 }

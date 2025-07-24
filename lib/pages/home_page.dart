@@ -39,36 +39,47 @@ class _HomePageState extends State<HomePage> {
   }
 
   // Upload image and process scanned card data
-  Future<void> _uploadImage() async {
-    if (_apiService.token == null) {
-      setState(() {
-        extractedData = {"error": "Please log in again"};
-      });
-      print('No token available');
-      Navigator.pushReplacementNamed(context, '/login');
-      return;
-    }
-    final ImagePicker _picker = ImagePicker();
-    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
-    if (image == null) return;
-
-    setState(() => isLoading = true);
-
-    try {
-      final imagePath = await _saveImageTemporarily(image);
-      final result = await _apiService.uploadImage(imagePath);
-      setState(() {
-        extractedData = result ?? {"error": "Failed to process image"};
-        isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        extractedData = {"error": "Error: $e"};
-        isLoading = false;
-      });
-    }
+Future<void> _uploadImage() async {
+  if (_apiService.token == null) {
+    setState(() {
+      extractedData = {"error": "Please log in again"};
+    });
+    print('No token available');
+    Navigator.pushReplacementNamed(context, '/login');
+    return;
   }
+  final ImagePicker _picker = ImagePicker();
+  final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+  if (image == null) return;
 
+  setState(() => isLoading = true);
+
+  try {
+    final imagePath = await _saveImageTemporarily(image);
+    final result = await _apiService.uploadImage(imagePath);
+    setState(() {
+      if (result != null) {
+        extractedData = result;
+        // Fetch the latest card to get the timestamp
+        _apiService.getCards().then((cards) {
+          if (cards != null && cards.isNotEmpty) {
+            setState(() {
+              extractedData['timestamp'] = cards[0]['timestamp'];
+            });
+          }
+        });
+      } else {
+        extractedData = {"error": "Failed to process image"};
+      }
+      isLoading = false;
+    });
+  } catch (e) {
+    setState(() {
+      extractedData = {"error": "Error: $e"};
+      isLoading = false;
+    });
+  }
+}
   // Show image quality popup before scanning
   Future<void> _showQualityPopup() async {
     return showDialog(
@@ -171,6 +182,54 @@ class _HomePageState extends State<HomePage> {
       );
     }
   }
+
+
+Future<void> _editField(String key, String currentValue, String timestamp) async {
+  TextEditingController controller = TextEditingController(text: currentValue);
+  return showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text('Edit ${key.replaceAll('_', ' ')}', style: const TextStyle(decoration: TextDecoration.none)),
+        content: TextField(
+          controller: controller,
+          decoration: InputDecoration(
+            hintText: 'Enter new ${key.replaceAll('_', ' ').toLowerCase()}',
+            hintStyle: const TextStyle(decoration: TextDecoration.none),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel', style: TextStyle(decoration: TextDecoration.none)),
+          ),
+          TextButton(
+            onPressed: () async {
+              final newValue = controller.text.trim();
+              if (newValue.isNotEmpty) {
+                final response = await _apiService.updateCard(timestamp, {key.toLowerCase(): newValue});
+                if (response != null && response['success'] == true) {
+                  setState(() {
+                    extractedData[key] = newValue; // Update local state
+                  });
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Field updated successfully', style: TextStyle(decoration: TextDecoration.none))),
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(response?['message'] ?? 'Failed to update field', style: const TextStyle(decoration: TextDecoration.none))),
+                  );
+                }
+              }
+              Navigator.of(context).pop();
+            },
+            child: const Text('Save', style: TextStyle(decoration: TextDecoration.none)),
+          ),
+        ],
+      );
+    },
+  );
+}
 
   @override
   Widget build(BuildContext context) {
@@ -340,149 +399,175 @@ class _HomePageState extends State<HomePage> {
                                     ),
                                   ),
                                 ] else ...[
-                                  ...extractedData.entries.map((entry) {
-                                    if (entry.key != "error") {
-                                      return Padding(
-                                        padding: const EdgeInsets.symmetric(vertical: 12.0),
-                                        child: Row(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Expanded(
-                                              flex: 2,
-                                              child: Text(
-                                                entry.key,
-                                                style: const TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 16,
-                                                  color: Color(0xFF18181B),
-                                                  decoration: TextDecoration.none,
-                                                ),
-                                              ),
-                                            ),
-                                            Expanded(
-                                              flex: 3,
-                                              child: Row(
-                                                mainAxisAlignment: MainAxisAlignment.end,
-                                                crossAxisAlignment: CrossAxisAlignment.start,
-                                                children: [
-                                                  Expanded(
-                                                    child: Text(
-                                                      entry.value,
-                                                      style: const TextStyle(
-                                                        fontSize: 16,
-                                                        color: Colors.white,
-                                                        decoration: TextDecoration.none,
-                                                      ),
-                                                      textAlign: TextAlign.right,
-                                                      softWrap: true,
-                                                    ),
-                                                  ),
-                                                  const SizedBox(width: 8),
-                                                  if (entry.key == "Company Name" && entry.value.isNotEmpty)
-                                                    Container(
-                                                      width: 40,
-                                                      height: 40,
-                                                      decoration: BoxDecoration(
-                                                        gradient: const LinearGradient(
-                                                          colors: [Color(0xFF2B32B2), Color(0xFF1488CC)],
-                                                          begin: Alignment.topLeft,
-                                                          end: Alignment.bottomRight,
-                                                        ),
-                                                        borderRadius: BorderRadius.circular(12),
-                                                        boxShadow: [
-                                                          BoxShadow(
-                                                            color: Colors.black.withOpacity(0.1),
-                                                            blurRadius: 6,
-                                                            offset: const Offset(0, 2),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                      child: IconButton(
-                                                        icon: const Icon(Icons.search, color: Colors.white, size: 20),
-                                                        onPressed: () => _searchCompany(entry.value),
-                                                      ),
-                                                    ),
-                                                  if (entry.key == "Email" && entry.value.isNotEmpty)
-                                                    Container(
-                                                      width: 40,
-                                                      height: 40,
-                                                      decoration: BoxDecoration(
-                                                        gradient: const LinearGradient(
-                                                          colors: [Color(0xFFef473a), Color(0xFFcb2d3e)],
-                                                          begin: Alignment.topLeft,
-                                                          end: Alignment.bottomRight,
-                                                        ),
-                                                        borderRadius: BorderRadius.circular(12),
-                                                        boxShadow: [
-                                                          BoxShadow(
-                                                            color: Colors.black.withOpacity(0.1),
-                                                            blurRadius: 6,
-                                                            offset: const Offset(0, 2),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                      child: IconButton(
-                                                        icon: const Icon(Icons.email, color: Colors.white, size: 20),
-                                                        onPressed: () => _sendEmail(entry.value),
-                                                      ),
-                                                    ),
-                                                  if (entry.key == "Phone" && entry.value.isNotEmpty)
-                                                    Container(
-                                                      width: 40,
-                                                      height: 40,
-                                                      decoration: BoxDecoration(
-                                                        gradient: const LinearGradient(
-                                                          colors: [Color(0xFF2B32B2), Color(0xFF1488CC)],
-                                                          begin: Alignment.topLeft,
-                                                          end: Alignment.bottomRight,
-                                                        ),
-                                                        borderRadius: BorderRadius.circular(12),
-                                                        boxShadow: [
-                                                          BoxShadow(
-                                                            color: Colors.black.withOpacity(0.1),
-                                                            blurRadius: 6,
-                                                            offset: const Offset(0, 2),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                      child: IconButton(
-                                                        icon: const Icon(Icons.person_add, color: Colors.white, size: 20),
-                                                        onPressed: () => _saveToContacts(entry.value, extractedData["Person Name"]),
-                                                      ),
-                                                    ),
-                                                  if (entry.key == "QR URL" && entry.value.isNotEmpty)
-                                                    Container(
-                                                      width: 40,
-                                                      height: 40,
-                                                      decoration: BoxDecoration(
-                                                        gradient: const LinearGradient(
-                                                          colors: [Color(0xFF2B32B2), Color(0xFF1488CC)],
-                                                          begin: Alignment.topLeft,
-                                                          end: Alignment.bottomRight,
-                                                        ),
-                                                        borderRadius: BorderRadius.circular(12),
-                                                        boxShadow: [
-                                                          BoxShadow(
-                                                            color: Colors.black.withOpacity(0.1),
-                                                            blurRadius: 6,
-                                                            offset: const Offset(0, 2),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                      child: IconButton(
-                                                        icon: const Icon(Icons.link, color: Colors.white, size: 20),
-                                                        onPressed: () => _launchURL(entry.value),
-                                                      ),
-                                                    ),
-                                                ],
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      );
-                                    }
-                                    return const SizedBox.shrink();
-                                  }).toList(),
+...extractedData.entries.map((entry) {
+  if (entry.key != "error" && entry.key != "timestamp") {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            flex: 2,
+            child: Text(
+              entry.key,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                color: Color(0xFF18181B),
+                decoration: TextDecoration.none,
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 3,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Text(
+                    entry.value,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      color: Colors.white,
+                      decoration: TextDecoration.none,
+                    ),
+                    textAlign: TextAlign.right,
+                    softWrap: true,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                // Edit button
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF2B32B2), Color(0xFF1488CC)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 6,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: IconButton(
+                    icon: const Icon(Icons.edit, color: Colors.white, size: 20),
+                    onPressed: () => _editField(entry.key, entry.value, extractedData['timestamp'] ?? ''),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                // Existing action buttons
+                if (entry.key == "Company Name" && entry.value.isNotEmpty)
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF2B32B2), Color(0xFF1488CC)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 6,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: IconButton(
+                      icon: const Icon(Icons.search, color: Colors.white, size: 20),
+                      onPressed: () => _searchCompany(entry.value),
+                    ),
+                  ),
+                if (entry.key == "Email" && entry.value.isNotEmpty)
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFFef473a), Color(0xFFcb2d3e)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 6,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: IconButton(
+                      icon: const Icon(Icons.email, color: Colors.white, size: 20),
+                      onPressed: () => _sendEmail(entry.value),
+                    ),
+                  ),
+                if (entry.key == "Phone" && entry.value.isNotEmpty)
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF2B32B2), Color(0xFF1488CC)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 6,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: IconButton(
+                      icon: const Icon(Icons.person_add, color: Colors.white, size: 20),
+                      onPressed: () => _saveToContacts(entry.value, extractedData["Person Name"]),
+                    ),
+                  ),
+                if (entry.key == "QR URL" && entry.value.isNotEmpty)
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF2B32B2), Color(0xFF1488CC)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 6,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: IconButton(
+                      icon: const Icon(Icons.link, color: Colors.white, size: 20),
+                      onPressed: () => _launchURL(entry.value),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+  return const SizedBox.shrink();
+}).toList(),
                                 ],
                               ],
                             ),
