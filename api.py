@@ -144,6 +144,44 @@ def validate_token():
     current_user = get_jwt_identity()
     return jsonify({"success": True, "message": "Token is valid", "username": current_user}), 200
 
+
+
+
+@app.route('/update_card', methods=['PUT'])
+@jwt_required()
+def update_card():
+    current_user = get_jwt_identity()
+    data = request.get_json()
+    timestamp = data.get('timestamp')
+    updates = data.get('updates')  # Dictionary of fields to update, e.g., {"person_name": "New Name"}
+
+    if not timestamp or not updates:
+        return jsonify({"success": False, "message": "Timestamp and updates are required"}), 400
+
+    try:
+        datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
+    except ValueError:
+        return jsonify({"success": False, "message": "Invalid timestamp format"}), 400
+
+    # Validate updates to ensure only allowed fields are modified
+    allowed_fields = ["person_name", "company_name", "job_title", "phone", "email", "address", "qr_url"]
+    updates = {k: v for k, v in updates.items() if k in allowed_fields}
+
+    if not updates:
+        return jsonify({"success": False, "message": "No valid fields to update"}), 400
+
+    result = cards_collection.update_one(
+        {"user": current_user, "timestamp": timestamp},
+        {"$set": updates}
+    )
+
+    if result.modified_count > 0:
+        return jsonify({"success": True, "message": "Card updated successfully"}), 200
+    return jsonify({"success": False, "message": "Card not found or no changes made"}), 404
+
+
+
+
 #_________________________________________________________
 def send_reset_email(email, code):
     try:
