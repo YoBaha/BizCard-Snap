@@ -45,6 +45,8 @@ dependencies:
   barcode_scan2: ^4.5.1
   shared_preferences: ^2.5.3
   flutter_launcher_icons: ^0.14.4
+  pdf: ^3.11.3
+  share_plus: ^11.1.0
 
 dev_dependencies:
   flutter_test:
